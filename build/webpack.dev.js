@@ -21,7 +21,7 @@ module.exports = merge(common, {
     }),
   ],
   output: {
-    filename: '[name].[contenthash].js',
+    filename: 'xspreadsheet.js',
   },
   devtool: 'inline-source-map',
   devServer: {
