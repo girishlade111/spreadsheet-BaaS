@@ -434,16 +434,19 @@ body {
 .@{css-prefix}-item {
   user-select: none;
   background: 0;
-  border: 1px solid transparent;
+  border: none;
   outline: none;
-  height: 26px;
-  color: rgba(0, 0, 0, .9);
-  line-height: 26px;
+  height: 32px;
+  color: #374151;
+  line-height: 32px;
   list-style: none;
-  padding: 2px 10px;
+  padding: 0 12px;
   cursor: default;
   text-align: left;
   overflow: hidden;
+  font-size: 13px;
+  font-weight: 400;
+  transition: background-color 0.15s ease;
 
   &.disabled {
     pointer-events: none;
@@ -451,25 +454,22 @@ body {
   }
 
   &:hover, &.active {
-    background: rgba(0, 0, 0, .05);
+    background: #F3F4F6;
+    color: #1F2937;
   }
-
-  // &.active {
-    ////   background: #89aef53d;
-  // }
 
   &.divider {
     height: 0;
     padding: 0;
-    margin: 5px 0;
+    margin: 4px 0;
     border: none;
-    border-bottom: 1px solid rgba(0, 0, 0, .1);
+    border-bottom: 1px solid #E5E7EB;
   }
 
   .label {
     float: right;
-    opacity: .65;
-    font-size: 1em;
+    opacity: 0.6;
+    font-size: 12px;
   }
 }
 
