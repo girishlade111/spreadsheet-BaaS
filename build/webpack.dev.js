@@ -14,10 +14,7 @@ module.exports = merge(common, {
       title: 'x-spreadsheet',
     }),
     new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: '[name].[contenthash].css',
-      // chunkFilename: devMode ? '[id].[hash].css' : '[id].css',
+      filename: 'xspreadsheet.css',
     }),
   ],
   output: {
