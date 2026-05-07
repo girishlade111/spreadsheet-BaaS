@@ -9,35 +9,75 @@ A comprehensive, enterprise-grade web-based spreadsheet component built with HTM
 1. [Introduction](#introduction)
 2. [Installation](#installation)
 3. [Quick Start](#quick-start)
-4. [Core Architecture](#core-architecture)
+4. [Architecture Overview](#architecture-overview)
 5. [Component System](#component-system)
-6. [Features Detailed](#features-detailed)
-7. [Configuration Options](#configuration-options)
-8. [API Reference](#api-reference)
-9. [Events System](#events-system)
-10. [Data Structure](#data-structure)
-11. [Formulas Reference](#formulas-reference)
-12. [Cell Formatting](#cell-formatting)
-13. [Data Validation](#data-validation)
-14. [Keyboard Shortcuts](#keyboard-shortcuts)
-15. [Toolbars Reference](#toolbars-reference)
-16. [Context Menu Reference](#context-menu-reference)
-17. [Auto-Filter System](#auto-filter-system)
-18. [Freeze Panes](#freeze-panes)
-19. [Style Management](#style-management)
-20. [Undo/Redo System](#undoredo-system)
-21. [Clipboard Operations](#clipboard-operations)
-22. [Internationalization](#internationalization)
-23. [Rendering System](#rendering-system)
-24. [Performance Optimization](#performance-optimization)
-25. [Common Patterns](#common-patterns)
-26. [Troubleshooting](#troubleshooting)
+6. [Data Flow](#data-flow)
+7. [Features Detailed](#features-detailed)
+8. [Configuration Options](#configuration-options)
+9. [API Reference](#api-reference)
+10. [Events System](#events-system)
+11. [Data Structure](#data-structure)
+12. [Formulas Reference](#formulas-reference)
+13. [Cell Formatting](#cell-formatting)
+14. [Data Validation](#data-validation)
+15. [Keyboard Shortcuts](#keyboard-shortcuts)
+16. [Toolbars Reference](#toolbars-reference)
+17. [Context Menu Reference](#context-menu-reference)
+18. [Auto-Filter System](#auto-filter-system)
+19. [Freeze Panes](#freeze-panes)
+20. [Style Management](#style-management)
+21. [Undo/Redo System](#undoredo-system)
+22. [Clipboard Operations](#clipboard-operations)
+23. [Internationalization](#internationalization)
+24. [Rendering System](#rendering-system)
+25. [Expression Parser](#expression-parser)
+26. [Performance Optimization](#performance-optimization)
+27. [Common Patterns](#common-patterns)
+28. [Troubleshooting](#troubleshooting)
+29. [Migration Guide](#migration-guide)
+30. [API Summary](#api-summary)
 
 ---
 
 ## Introduction
 
-x-spreadsheet is a client-side JavaScript library that renders a fully functional spreadsheet interface using HTML5 Canvas. Unlike DOM-based approaches, Canvas rendering provides superior performance for large datasets and complex styling operations.
+### What is x-spreadsheet?
+
+x-spreadsheet is a **client-side JavaScript library** that renders a fully functional spreadsheet interface using **HTML5 Canvas**. Unlike DOM-based approaches, Canvas rendering provides superior performance for large datasets and complex styling operations.
+
+```mermaid
+graph TB
+    subgraph "x-spreadsheet"
+        JS["JavaScript Library"]
+        Canvas["HTML5 Canvas"]
+        CSS["CSS Stylesheet"]
+    end
+    
+    subgraph "Features"
+        F1["Formulas"]
+        F2["Cell Merging"]
+        F3["Validation"]
+        F4["Auto-Filter"]
+        F5["Freeze Panes"]
+        F6["Formatting"]
+    end
+    
+    subgraph "Output"
+        O1["Web Browser"]
+        O2["Interactive UI"]
+        O3["Data Export"]
+    end
+    
+    JS --> Canvas
+    JS --> CSS
+    F1 --> O2
+    F2 --> O2
+    F3 --> O2
+    F4 --> O2
+    F5 --> O2
+    F6 --> O2
+    O1 --> O2
+```
 
 ### Key Capabilities
 
@@ -181,53 +221,110 @@ const spreadsheet = Spreadsheet('#container', {
 
 ---
 
-## Core Architecture
+## Architecture Overview
 
-### MVC Architecture Pattern
+### High-Level Architecture
 
-x-spreadsheet implements a Model-View-Controller (MVC) architecture specifically designed for canvas-based spreadsheet rendering:
+x-spreadsheet implements a **Model-View-Controller (MVC)** architecture specifically designed for canvas-based spreadsheet rendering:
 
+```mermaid
+flowchart TB
+    subgraph "spreadsheet Instance"
+        Spreadsheet["Spreadsheet Class<br/>(Main Entry Point)"]
+    end
+    
+    subgraph "Controller Layer"
+        Event["Event Handler<br/>(Keyboard, Mouse, Touch)"]
+        Command["Command Processor"]
+    end
+    
+    subgraph "Model Layer"
+        Data["DataProxy<br/>(Cells, Rows, Cols)"]
+        History["History<br/>(Undo/Redo Stack)"]
+        Selector["Selector<br/>(Selection State)"]
+    end
+    
+    subgraph "View Layer"
+        Canvas["Canvas Renderer"]
+        Toolbar["Toolbar UI"]
+        Bottombar["Bottombar UI"]
+        Context["Context Menu"]
+    end
+    
+    Spreadsheet --> Event
+    Event --> Command
+    Command --> Data
+    Command --> History
+    Data --> Canvas
+    Data --> History
+    History --> Canvas
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                       Spreadsheet                                │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │                     CONTROLLER                             │   │
-│  │  - Event handling (keyboard, mouse, touch)                  │   │
-│  │  - User input processing                                  │   │
-│  │  - Command routing                                        │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                              │                                  │
-│  ┌───────────────────────────┴─────────────────────────────┐   │
-│  │                         MODEL                            │   │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │   │
-│  │  │ DataProxy  │  │   History   │  │    Selector    │  │   │
-│  │  │  - cells   │  │ - undo stack │  │ - selection   │  │   │
-│  │  │  - rows   │  │ - redo stack │  │ - focus       │  │   │
-│  │  │  - cols  │  │              │  └─────────────────┘  │   │
-│  │  │  - styles│  │              │                         │   │
-│  │  │  - merges│  │              │                         │   │
-│  │  └─────────────┘  └─────────────┘                         │   │
-│  └───────────────────────────────────────────────────────────┘   │
-│                              │                                  │
-│  ┌───────────────────────────┴─────────────────────────────┐   │
-│  │                          VIEW                             │   │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │   │
-│  │  │   Sheet    │  │  Toolbar   │  │   Bottombar    │  │   │
-│  │  │  - canvas  │  │  - buttons│  │  - tabs       │  │   │
-│  │  │  - grid   │  │  - menus  │  │  - add button │  │   │
-│  │  └─────────────┘  └─────────────┘  └─────────────────┘  │   │
-│  └───────────────────────────────────────────────────────────┘   │
-└───────────────────────────────────────────────────────────────┘
-```
 
-### Data Flow
+### Core Component Architecture
 
-```
-User Input → Event Handler → Command Processor → DataProxy
-                                    ↓
-                              History (undo)
-                                    ↓
-                              Change Event → View Update → Canvas Render
+```mermaid
+classDiagram
+    class Spreadsheet {
+        +options: Object
+        +datas: DataProxy[]
+        +sheetIndex: number
+        +sheet: Sheet
+        +bottombar: Bottombar
+        +addSheet(name, active) DataProxy
+        +deleteSheet()
+        +loadData(data) this
+        +getData() Array
+        +cellText(ri, ci, text, sheetIndex) this
+        +cell(ri, ci, sheetIndex) Cell
+        +cellStyle(ri, ci, sheetIndex) Style
+        +reRender() this
+        +on(eventName, func) this
+    }
+    
+    class DataProxy {
+        +name: string
+        +freeze: Array
+        +styles: Array
+        +merges: Merges
+        +rows: Rows
+        +cols: Cols
+        +validations: Validations
+        +selector: Selector
+        +scroll: Scroll
+        +history: History
+        +clipboard: Clipboard
+        +autoFilter: AutoFilter
+    }
+    
+    class Sheet {
+        +data: DataProxy
+        +el: Element
+        +table: Table
+        +toolbar: Toolbar
+        +contextmenu: ContextMenu
+        +editor: Editor
+    }
+    
+    class Toolbar {
+        +data: DataProxy
+        +items: Array
+        +el: Element
+    }
+    
+    class Bottombar {
+        +dataNames: Array
+        +items: Array
+        +el: Element
+        +addItem(name, active, options)
+        +deleteItem()
+        +renameItem(index, value)
+    }
+    
+    Spreadsheet --> DataProxy
+    Spreadsheet --> Sheet
+    Sheet --> Toolbar
+    Sheet --> Bottombar
+    DataProxy "many" --> "*" Sheet
 ```
 
 ---
@@ -236,86 +333,240 @@ User Input → Event Handler → Command Processor → DataProxy
 
 ### Component Hierarchy
 
-```
-Spreadsheet
-├── Root Element (div.x-spreadsheet)
-│   ├── Toolbar (div.x-spreadsheet-toolbar)
-│   │   ├── Undo/Redo
-│   │   ├── Print
-│   │   ├── Paint Format
-│   │   ├── Clear Format
-│   │   ├── Format
-│   │   ├── Font/Font Size
-│   │   ├── Text Style (Bold, Italic, Underline, Strike)
-│   │   ├── Colors (Text, Fill)
-│   │   ├── Border
-│   │   ├── Merge
-│   │   ├── Alignment (Horizontal, Vertical)
-│   │   ├── Text Wrap
-│   │   ├── Freeze
-│   │   ├── Autofilter
-│   │   ├── Formula
-│   │   └── More dropdown
-│   ├── Sheet Container (div.x-spreadsheet-table)
-│   │   ├── Column Headers
-│   │   ├── Row Headers
-│   │   ├── Canvas (main editor)
-│   │   ├── Scrollbar X
-│   │   ├── Scrollbar Y
-│   │   ├── Editor (textarea overlay)
-│   │   ├── Selector (selection highlights)
-│   │   └── Context Menu
-│   └── Bottombar (div.x-spreadsheet-bottombar)
-│       ├── Sheet Tabs
-│       └── Add Sheet Button
-```
-
-### Component Responsibilities
-
-#### DataProxy (Model)
-
-The DataProxy class is the core data model that manages all spreadsheet data:
-
-```javascript
-// Located in: src/core/data_proxy.js
-class DataProxy {
-  constructor(name, settings) {
-    this.name = name || 'sheet';
-    this.freeze = [0, 0];           // [row, col] freeze position
-    this.styles = [];              // Style definitions array
-    this.merges = new Merges();    // Merged cell ranges
-    this.rows = new Rows();        // Row data
-    this.cols = new Cols();        // Column data
-    this.validations = new Validations();
-    this.hyperlinks = {};
-    this.comments = {};
+```mermaid
+flowchart TB
+    subgraph Root["Root Element (div.x-spreadsheet)"]
+        Toolbar["Toolbar<br/>(Formatting Buttons)"]
+        Container["Sheet Container"]
+        Bottombar["Bottombar<br/>(Sheet Tabs)"]
+    end
     
-    // Runtime only (not persisted)
-    this.selector = new Selector();
-    this.scroll = new Scroll();
-    this.history = new History();
-    this.clipboard = new Clipboard();
-    this.autoFilter = new AutoFilter();
-  }
-}
+    subgraph Toolbar
+        T1["Undo/Redo"]
+        T2["Print"]
+        T3["Format"]
+        T4["Font"]
+        T5["Text Style"]
+        T6["Colors"]
+        T7["Border"]
+        T8["Merge"]
+        T9["Alignment"]
+        T10["Data Tools"]
+        T11["More Dropdown"]
+    end
+    
+    subgraph Container["Sheet Container"]
+        ColHeader["Column Headers"]
+        RowHeader["Row Headers"]
+        Canvas["Main Canvas"]
+        Editor["Editor Overlay"]
+        Selector["Selection"]
+        Context["Context Menu"]
+    end
+    
+    subgraph Bottombar
+        Tab1["Sheet Tab 1"]
+        Tab2["Sheet Tab 2"]
+        Add["Add Button"]
+    end
+    
+    Root --> Toolbar
+    Root --> Container
+    Root --> Bottombar
+    
+    Toolbar --> T1
+    Toolbar --> T2
+    Toolbar --> T3
+    Toolbar --> T4
+    Toolbar --> T5
+    Toolbar --> T6
+    Toolbar --> T7
+    Toolbar --> T8
+    Toolbar --> T9
+    Toolbar --> T10
+    Toolbar --> T11
+    
+    Container --> ColHeader
+    Container --> RowHeader
+    Container --> Canvas
+    Container --> Editor
+    Container --> Selector
+    Container --> Context
+    
+    Bottombar --> Tab1
+    Bottombar --> Tab2
+    Bottombar --> Add
 ```
 
-#### Sheet (View)
+---
 
-The Sheet component handles all Canvas rendering:
+## Data Flow
 
-```javascript
-// Located in: src/component/sheet.js
-class Sheet {
-  constructor(rootEl, data) {
-    this.data = data;
-    this.el = rootEl;
-    this.table = new Table(rootEl, data);
-    this.toolbar = new Toolbar(data, ...);
-    this.contextmenu = new ContextMenu(...);
-    this.editor = new Editor(data, ...);
-  }
-}
+### Complete Data Flow Diagram
+
+```mermaid
+flowchart LR
+    subgraph Input["User Input"]
+        KB["Keyboard Input"]
+        MC["Mouse Click"]
+        DR["Drag Select"]
+        CT["Context Menu"]
+    end
+    
+    subgraph Event["Event Processing"]
+        EH["Event Handler"]
+        VP["Validate Input"]
+        CC["Create Command"]
+    end
+    
+    subgraph Command["Command Execution"]
+        CP["Command Processor"]
+        VD["Validate Data"]
+        MD["Modify Data"]
+    end
+    
+    subgraph DataModel["Data Model"]
+        RW["Rows"]
+        CL["Cols"]
+        ST["Styles"]
+        MG["Merges"]
+        VL["Validations"]
+    end
+    
+    subgraph History["History System"]
+        UN["Undo Stack"]
+        RN["Redo Stack"]
+    end
+    
+    subgraph Update["View Update"]
+        TR["Trigger Event"]
+        RR["Render Request"]
+    end
+    
+    subgraph Render["Rendering"]
+        CL["Clear Canvas"]
+        BD["Draw Background"]
+        DC["Draw Content"]
+        DS["Draw Selection"]
+    end
+    
+    Input --> EH
+    EH --> VP
+    VP --> CC
+    CC --> CP
+    CP --> VD
+    
+    VD -->|Valid| MD
+    VD -->|Invalid| ER["Error Message"]
+    
+    MD --> RW
+    MD --> CL
+    MD --> ST
+    MD --> MG
+    MD --> VL
+    
+    MD --> UN
+    MD --> RN
+    
+    MD --> TR
+    TR --> RR
+    RR --> CL
+    CL --> BD
+    BD --> DC
+    DC --> DS
+    
+    MC --> EH
+    DR --> EH
+    CT --> EH
+```
+
+### Cell Edit Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Editor
+    participant Selector
+    participant DataProxy
+    participant History
+    participant Canvas
+    
+    User->>Editor: Double-click cell
+    Editor->>Selector: Set selection (ri, ci)
+    Selector->>DataProxy: Update selection
+    DataProxy->>Canvas: Render selection highlight
+    
+    Editor->>Editor: Show textarea overlay
+    
+    User->>Editor: Type text
+    
+    loop Input Processing
+        Editor->>Editor: Process input event
+        Editor->>DataProxy: setCellText(ri, ci, text, 'input')
+    end
+    
+    User->>Editor: Press Enter/Tab
+    
+    Editor->>DataProxy: setCellText(ri, ci, text, 'finished')
+    DataProxy->>History: Add to history stack
+    DataProxy->>DataProxy: Trigger change event
+    
+    Editor->>Editor: Hide textarea
+    DataProxy->>Canvas: Re-render cell
+```
+
+### Copy/Paste Flow
+
+```mermaid
+flowchart TB
+    subgraph Copy["Copy Operation"]
+        C1["Select range"]
+        C2["Read cell data"]
+        C3["Format as tab-separated"]
+        C4["Copy to clipboard"]
+    end
+    
+    subgraph Paste["Paste Operation"]
+        P1["Trigger paste event"]
+        P2["Read clipboard"]
+        P3["Parse tab-separated"]
+        P4["Calculate target range"]
+        P5["Validate target"]
+    end
+    
+    subgraph Validation["Validation"]
+        V1["Check for merges"]
+        V2["Check dimensions"]
+        V3["Check read-only"]
+    end
+    
+    subgraph Execute["Execute Paste"]
+        E1["Copy values"]
+        E2["Copy styles"]
+        E3["Handle formulas"]
+        E4["Update merges"]
+    end
+    
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+    P4 --> V1
+    V1 --> V2
+    V2 --> V3
+    
+    V1 -->|Valid| E1
+    V2 -->|Valid| E2
+    V3 -->|Valid| E3
+    
+    E1 --> E4
+    
+    V1 -->|Invalid| VE["Show error"]
+    V2 -->|Invalid| VE
+    V3 -->|Invalid| VE
 ```
 
 ---
@@ -324,59 +575,40 @@ class Sheet {
 
 ### 1. Cell Editing System
 
-The cell editing system supports multiple input modes:
-
-#### Direct Edit Mode
-
-Click on a cell to select it, then start typing to edit:
-
-```javascript
-// Cell selection triggers:
-element.on('dblclick', () => {
-  this.data.selector.set(ri, ci);
-  this.editor.show();
-});
-```
-
-#### Formula Input
-
-Formulas are automatically detected when text starts with `=`:
-
-```javascript
-// Example formulas
-=SUM(A1:A10)
-=AVERAGE(B2:B5)
-=IF(A1>100, "High", "Low")
-```
-
-#### Multi-line Text
-
-Press Alt+Enter to insert a line break within a cell:
-
-```javascript
-// Multi-line support in editor.js
-if (keyCode === 13 && altKey) {
-  insertText('\n');
-}
-```
-
-### 2. Selection System
-
-The selector manages cell and range selection state:
-
-```javascript
-// Located in: src/core/selector.js
-class Selector {
-  constructor() {
-    this.ri = 0;          // Row index
-    this.ci = 0;         // Column index
-    this.rn = 1;         // Row count
-    this.cn = 1;         // Column count
-    this.range = new CellRange(0, 0, 0, 0);
-    this.multiple = false;
-    this.active = false;
-  }
-}
+```mermaid
+flowchart TB
+    subgraph "Input Modes"
+        DM1["Direct Edit"]
+        DM2["Formula Edit"]
+        DM3["Multi-line Edit"]
+    end
+    
+    subgraph "Text Input"
+        TI1["Click to select"]
+        TI2["Click again to edit"]
+        TI3["Type content"]
+        TI4["Press Enter/Tab"]
+        TI5["Press Escape"]
+    end
+    
+    subgraph "Formula Detection"
+        FD1["Check if text starts with ="]
+        FD2["Parse formula"]
+        FD3["Execute function"]
+        FD4["Display result"]
+    end
+    
+    DM1 --> TI1
+    TI1 --> TI2
+    TI2 --> TI3
+    TI3 --> TI4
+    TI3 --> TI5
+    
+    TI3 --> FD1
+    FD1 -->|Yes| FD2
+    FD1 -->|No| TI4
+    FD2 --> FD3
+    FD3 --> FD4
 ```
 
 #### Selection Types
@@ -389,27 +621,96 @@ class Selector {
 | Column | Entire column | Click column header |
 | All | Entire sheet | Ctrl+A |
 
-### 3. Rendering System
+### 2. Formula Processing
 
-The Canvas rendering system uses device pixel ratio for crisp rendering:
-
-```javascript
-// Located in: src/canvas/draw.js
-class Draw {
-  constructor(el, width, height) {
-    this.ctx = el.getContext('2d');
-    this.ctx.scale(dpr(), dpr());  // Device pixel ratio
-  }
-}
+```mermaid
+flowchart LR
+    subgraph Input["Formula Input"]
+        F1["User types =SUM(A1:A10)"]
+    end
+    
+    subgraph Parse["Formula Parse"]
+        F2["Extract function name"]
+        F3["Parse arguments"]
+        F4["Resolve cell references"]
+    end
+    
+    subgraph Execute["Execute"]
+        F5["Get cell values"]
+        F6["Apply function"]
+        F7["Calculate result"]
+    end
+    
+    subgraph Output["Display"]
+        F8["Store result in cell"]
+        F9["Render cell"]
+    end
+    
+    F1 --> F2
+    F2 --> F3
+    F3 --> F4
+    F4 --> F5
+    F5 --> F6
+    F6 --> F7
+    F7 --> F8
+    F8 --> F9
 ```
 
-#### Render Layers
+### 3. Rendering Pipeline
 
-1. **Background layer**: Cell backgrounds, grid lines
-2. **Content layer**: Cell text, formulas, numbers
-3. **Border layer**: Cell borders, merged cell borders
-4. **Selection layer**: Selection highlights, active cell
-5. **Editor overlay**: Inline text editor
+```mermaid
+flowchart TB
+    subgraph "Phase 1: Clear"
+        R1["Clear entire canvas"]
+    end
+    
+    subgraph "Phase 2: Grid"
+        R2["Draw column headers"]
+        R3["Draw row headers"]
+        R4["Draw grid lines"]
+    end
+    
+    subgraph "Phase 3: Background"
+        R5["Draw cell backgrounds"]
+        R6["Draw fill colors"]
+    end
+    
+    subgraph "Phase 4: Borders"
+        R7["Draw cell borders"]
+        R8["Draw merged cell borders"]
+    end
+    
+    subgraph "Phase 5: Content"
+        R9["Draw text content"]
+        R10["Draw numbers"]
+        R11["Draw formulas"]
+    end
+    
+    subgraph "Phase 6: Selection"
+        R12["Draw selection highlight"]
+        R13["Draw active cell border"]
+    end
+    
+    subgraph "Phase 7: Overlay"
+        R14["Draw editor"]
+        R15["Draw context menu"]
+    end
+    
+    R1 --> R2
+    R2 --> R3
+    R3 --> R4
+    R4 --> R5
+    R5 --> R6
+    R6 --> R7
+    R7 --> R8
+    R8 --> R9
+    R9 --> R10
+    R10 --> R11
+    R11 --> R12
+    R12 --> R13
+    R13 --> R14
+    R14 --> R15
+```
 
 ---
 
@@ -882,85 +1183,83 @@ spreadsheet.change((data) => {
 }
 ```
 
-### Cell Data Object
+### Internal Data Structure Diagram
 
-```javascript
-{
-  text: 'Cell content',      // Required: Cell text
-  style: 0,                // Optional: Style index in styles array
-  merge: [2, 1]           // Optional: [row span, col span]
-}
+```mermaid
+classDiagram
+    class DataProxy {
+        +string name
+        +number[] freeze
+        +Object[] styles
+        +Merges merges
+        +Rows rows
+        +Cols cols
+        +Validations validations
+        +Selector selector
+        +Scroll scroll
+        +History history
+        +Clipboard clipboard
+        +AutoFilter autoFilter
+    }
+    
+    class Rows {
+        +number len
+        +Object _ (cells data)
+        +getCell(ri, ci) Cell
+        +setCell(ri, ci, cell)
+        +getHeight(ri) number
+        +setHeight(ri, height)
+        +insert(ri, n)
+        +delete(ri, n)
+    }
+    
+    class Cols {
+        +number len
+        +Object _ (column widths)
+        +getWidth(ci) number
+        +setWidth(ci, width)
+    }
+    
+    class Cell {
+        +string text
+        +number style (index)
+        +number[] merge
+    }
+    
+    class Style {
+        +string bgcolor
+        +string align
+        +string valign
+        +boolean textwrap
+        +boolean strike
+        +boolean underline
+        +string color
+        +Font font
+        +Border border
+        +string format
+    }
+    
+    class Border {
+        +string[] top
+        +string[] bottom
+        +string[] left
+        +string[] right
+    }
+    
+    class Font {
+        +string name
+        +number size
+        +boolean bold
+        +boolean italic
+    }
+    
+    DataProxy --> Rows
+    DataProxy --> Cols
+    DataProxy --> Style
+    Rows --> Cell
+    Style --> Font
+    Style --> Border
 ```
-
-### Style Definition
-
-```javascript
-{
-  // ==================== ALIGNMENT ====================
-  align: 'left',           // 'left' | 'center' | 'right'
-  valign: 'middle',       // 'top' | 'middle' | 'bottom'
-  
-  // ==================== TEXT STYLE ====================
-  bold: false,            // Bold text
-  italic: false,          // Italic text
-  underline: false,      // Underlined text
-  strike: false,        // Strikethrough text
-  textwrap: false,      // Wrap text in cell
-  
-  // ==================== COLORS ====================
-  color: '#0a0a0a',      // Text color (hex)
-  bgcolor: '#ffffff',    // Background color (hex)
-  
-  // ==================== FONT ====================
-  font: {
-    name: 'Arial',       // Font family name
-    size: 10,          // Font size in points
-    bold: false,        // Font weight bold
-    italic: false      // Font style italic
-  },
-  
-  // ==================== BORDERS ====================
-  border: {
-    top: ['thin', '#000000'],    // [style, color]
-    bottom: ['thin', '#000000'],
-    left: ['thin', '#000000'],
-    right: ['thin', '#000000']
-  },
-  
-  // ==================== FORMAT ====================
-  format: 'normal'        // Number format type
-}
-```
-
-### Border Format
-
-Each border is defined as: `[style, color]`
-
-**Available Border Styles:**
-
-| Style | Description | Visual Weight |
-|-------|-------------|---------------|
-| `'thin'` | Thin line | 1px |
-| `'medium'` | Medium line | 2px |
-| `'thick'` | Thick line | 3px |
-| `'dashed'` | Dashed line | - |
-| `'dotted'` | Dotted line | - |
-
-### Number Format Types
-
-| Format | Example Input | Example Output |
-|--------|--------------|---------------|
-| `'normal'` | 1234.567 | 1234.567 |
-| `'text'` | 00123 | 00123 (preserved) |
-| `'number'` | 1234.567 | 1,234.57 |
-| `'percent'` | 0.25 | 25% |
-| `'rmb'` | 1234.567 | ¥1,234.57 |
-| `'usd'` | 1234.567 | $1,234.57 |
-| `'eur'` | 1234.567 | €1,234.57 |
-| `'date'` | 44562 | 2022-01-01 |
-| `'time'` | 0.5 | 12:00 PM |
-| `'datetime'` | 44562.5 | 2022-01-01 12:00 |
-| `'duration'` | 100 | 00:01:40 |
 
 ---
 
@@ -994,6 +1293,43 @@ The spreadsheet supports the following formulas:
 | Function | Syntax | Description |
 |----------|--------|-------------|
 | CONCAT | `=CONCAT(text1, text2, ...)` | Concatenate text values |
+
+### Formula Processing Flow
+
+```mermaid
+flowchart TB
+    subgraph Input["Formula Detection"]
+        FD1["Input starts with ="]
+    end
+    
+    subgraph Parse["Formula Parsing"]
+        FP1["Extract function name"]
+        FP2["Parse parameters"]
+        FP3["Resolve cell references"]
+    end
+    
+    subgraph Execute["Execution"]
+        EX1["Get cell values"]
+        EX2["Convert to numbers"]
+        EX3["Apply math function"]
+    end
+    
+    subgraph Result["Result"]
+        RT1["Calculate result"]
+        RT2["Store in cell"]
+    end
+    
+    FD1 -->|Yes| FP1
+    FD1 -->|No| RT2
+    
+    FP1 --> FP2
+    FP2 --> FP3
+    FP3 --> EX1
+    EX1 --> EX2
+    EX2 --> EX3
+    EX3 --> RT1
+    RT1 --> RT2
+```
 
 ### Formula Examples
 
@@ -1039,16 +1375,6 @@ The spreadsheet supports the following formulas:
 | 1:1 | Entire row |
 | A1:D4, F1:G4 | Multiple ranges |
 
-### Formula Errors
-
-| Error | Description |
-|-------|-------------|
-| `#REF!` | Invalid cell reference |
-| `#NAME?` | Unknown function name |
-| `#VALUE!` | Invalid value type |
-| `#DIV/0!` | Division by zero |
-| `#N/A` | Value not available |
-
 ---
 
 ## Cell Formatting
@@ -1087,24 +1413,10 @@ The spreadsheet supports the following formulas:
     name: 'Arial',    // Font family
     size: 10,        // Font size (8-72)
     bold: true,       // Bold
-    italic: true     // Italic
+    italic: true      // Italic
   }
 }
 ```
-
-#### Available Fonts
-
-| Font Name | Platform |
-|----------|----------|
-| Arial | All |
-| Helvetica | Mac/Windows |
-| Times New Roman | All |
-| Courier New | All |
-| Georgia | All |
-| Verdana | All |
-| Tahoma | Windows |
-| Trebuchet MS | All |
-| Comic Sans MS | All |
 
 #### Text Decorations
 
@@ -1122,40 +1434,53 @@ The spreadsheet supports the following formulas:
 | `strike` | Strikethrough text | - |
 | `textwrap` | Wrap text within cell | - |
 
-#### Colors
+### Number Format Types
 
-```javascript
-{
-  color: '#RRGGBB',     // Text color (hex)
-  bgcolor: '#RRGGBB'    // Background color (hex)
-}
-```
-
-Color picker supports:
-- 16 basic colors
-- Custom hex color input
-- Theme colors
-
-#### Borders
-
-```javascript
-{
-  border: {
-    top: ['thin', '#000000'],
-    bottom: ['thin', '#000000'],
-    left: ['thin', '#000000'],
-    right: ['thin', '#000000']
-  }
-}
-```
+| Format | Example Input | Example Output |
+|--------|--------------|---------------|
+| `'normal'` | 1234.567 | 1234.567 |
+| `'text'` | 00123 | 00123 (preserved) |
+| `'number'` | 1234.567 | 1,234.57 |
+| `'percent'` | 0.25 | 25% |
+| `'rmb'` | 1234.567 | ¥1,234.57 |
+| `'usd'` | 1234.567 | $1,234.57 |
+| `'eur'` | 1234.567 | €1,234.57 |
 
 ---
 
 ## Data Validation
 
-### Validation Types
+### Validation Architecture
 
-Located in: `src/core/validation.js`
+```mermaid
+classDiagram
+    class Validations {
+        +Validation[] validations
+        +add(mode, ref, validator)
+        +remove(range)
+        +get(ri, ci) Validation
+        +validate(ri, ci, value) boolean
+    }
+    
+    class Validation {
+        +string mode
+        +string ref
+        +Validator validator
+    }
+    
+    class Validator {
+        +string type
+        +boolean required
+        +string operator
+        +any value1
+        +any value2
+    }
+    
+    Validations --> Validation
+    Validation --> Validator
+```
+
+### Validation Types
 
 ```javascript
 // Validation modes
@@ -1167,7 +1492,7 @@ Located in: `src/core/validation.js`
 ### Validation Configuration
 
 ```javascript
-// Add validation
+// List validation (dropdown)
 dataProxy.addValidation('list', 'A1:A10', {
   type: 'list',
   required: true,
@@ -1208,29 +1533,44 @@ dataProxy.addValidation('email', 'D2:D100', {
 | equal | `'eq'` | Equal to |
 | not equal | `'neq'` | Not equal to |
 
-### Validation Messages
-
-```javascript
-{
-  required: 'This field is required',
-  notMatch: 'Value does not match validation rule',
-  between: 'Value must be between {} and {}',
-  notBetween: 'Value must not be between {} and {}',
-  notIn: 'Value is not in the allowed list',
-  equal: 'Value must equal {}',
-  notEqual: 'Value must not equal {}',
-  lessThan: 'Value must be less than {}',
-  lessThanEqual: 'Value must be less than or equal to {}',
-  greaterThan: 'Value must be greater than {}',
-  greaterThanEqual: 'Value must be greater than or equal to {}'
-}
-```
-
 ---
 
 ## Keyboard Shortcuts
 
-### Editing Shortcuts
+### Complete Shortcut Reference
+
+```mermaid
+flowchart TB
+    subgraph "Editing"
+        E1["Enter: Confirm + Move Down"]
+        E2["Tab: Confirm + Move Right"]
+        E3["Escape: Cancel"]
+        E4["Backspace: Delete Before"]
+        E5["Delete: Delete After"]
+    end
+    
+    subgraph "Formatting"
+        F1["Ctrl+B: Bold"]
+        F2["Ctrl+I: Italic"]
+        F3["Ctrl+U: Underline"]
+    end
+    
+    subgraph "Clipboard"
+        C1["Ctrl+C: Copy"]
+        C2["Ctrl+V: Paste"]
+        C3["Ctrl+X: Cut"]
+    end
+    
+    subgraph "History"
+        H1["Ctrl+Z: Undo"]
+        H2["Ctrl+Y: Redo"]
+    end
+    
+    subgraph "Selection"
+        S1["Shift+Arrow: Extend"]
+        S2["Ctrl+A: Select All"]
+    end
+```
 
 | Shortcut | Action | Description |
 |---------|--------|-------------|
@@ -1242,153 +1582,166 @@ dataProxy.addValidation('email', 'D2:D100', {
 | Alt+Enter | New line | Insert line break in cell |
 | Arrow keys | Navigate | Move between cells |
 | Ctrl+Arrow | Jump | Jump to edge of data region |
-
-### Selection Shortcuts
-
-| Shortcut | Action | Description |
-|---------|--------|-------------|
 | Shift+Arrow | Extend selection | Extend selection by one cell |
 | Ctrl+Shift+Arrow | Jump select | Extend selection to edge |
 | Ctrl+A | Select all | Select entire sheet |
-
-### Formatting Shortcuts
-
-| Shortcut | Action | Description |
-|---------|--------|-------------|
 | Ctrl+B | Toggle bold | Toggle bold formatting |
 | Ctrl+I | Toggle italic | Toggle italic formatting |
 | Ctrl+U | Toggle underline | Toggle underline formatting |
-
-### Clipboard Shortcuts
-
-| Shortcut | Action | Description |
-|---------|--------|-------------|
 | Ctrl+C | Copy | Copy selected cells |
 | Ctrl+V | Paste | Paste from clipboard |
 | Ctrl+X | Cut | Cut selected cells |
 | Ctrl+Alt+V | Paste format | Paste format only |
 | Ctrl+Shift+V | Paste value | Paste values only |
-
-### Edit Operations
-
-| Shortcut | Action | Description |
-|---------|--------|-------------|
 | Ctrl+Z | Undo | Undo last action |
 | Ctrl+Y | Redo | Redo last action |
 | Delete | Clear | Clear cell content |
 | Ctrl+Shift+= | Insert | Open insert dialog |
 | Ctrl+- | Delete | Open delete dialog |
-
-### Navigation Shortcuts
-
-| Shortcut | Action | Description |
-|---------|--------|-------------|
 | Home | First cell | Move to first cell in row |
 | End | Last cell | Move to last cell in row with data |
-| Page Up | Page up | Move up one page |
-| Page Down | Page down | Move down one page |
 
 ---
 
 ## Toolbars Reference
 
-Located in: `src/component/toolbar/index.js`
-
 ### Toolbar Structure
 
-```
-Toolbar
-├── Group 1: History
-│   ├── Undo
-│   ├── Redo
-│   ├── Print
-│   ├── Paint Format
-│   └── Clear Format
-│
-├── Group 2: Format
-│   └── Number Format dropdown
-│
-├── Group 3: Font
-│   ├── Font family dropdown
-│   └── Font size dropdown
-│
-├── Group 4: Text Style
-│   ├── Bold (B)
-│   ├── Italic (I)
-│   ├── Underline (U)
-│   ├── Strikethrough (S)
-│   └── Text Color
-│
-├── Group 5: Cell Style
-│   ├── Fill Color
-│   ├── Borders
-│   └── Merge
-│
-├── Group 6: Alignment
-│   ├── Horizontal align
-│   ├── Vertical align
-│   └── Text wrap
-│
-├── Group 7: Data
-│   ├── Freeze
-│   ├── Filter
-│   └── Functions
-│
-└── Group 8: More
-    └── Additional tools dropdown
+```mermaid
+flowchart TB
+    subgraph Toolbar["Toolbar Components"]
+        
+        group1["Group 1: History"]
+        G1A["Undo"]
+        G1B["Redo"]
+        G1C["Print"]
+        G1D["Paint Format"]
+        G1E["Clear Format"]
+        
+        group2["Group 2: Format"]
+        G2A["Number Format"]
+        
+        group3["Group 3: Font"]
+        G3A["Font Family"]
+        G3B["Font Size"]
+        
+        group4["Group 4: Text Style"]
+        G4A["Bold"]
+        G4B["Italic"]
+        G4C["Underline"]
+        G4D["Strike"]
+        G4E["Text Color"]
+        
+        group5["Group 5: Cell Style"]
+        G5A["Fill Color"]
+        G5B["Borders"]
+        G5C["Merge"]
+        
+        group6["Group 6: Alignment"]
+        G6A["Horizontal"]
+        G6B["Vertical"]
+        G6C["Text Wrap"]
+        
+        group7["Group 7: Data"]
+        G7A["Freeze"]
+        G7B["Filter"]
+        G7C["Functions"]
+        
+    end
+    
+    Toolbar --> group1
+    Toolbar --> group2
+    Toolbar --> group3
+    Toolbar --> group4
+    Toolbar --> group5
+    Toolbar --> group6
+    Toolbar --> group7
 ```
 
 ---
 
 ## Context Menu Reference
 
-Located in: `src/component/contextmenu.js`
+### Context Menu Structure
 
-### Menu Items
-
-| Key | Title | Shortcut |
-|-----|-------|----------|
-| copy | Copy | Ctrl+C |
-| cut | Cut | Ctrl+X |
-| paste | Paste | Ctrl+V |
-| paste-value | Paste values only | Ctrl+Shift+V |
-| paste-format | Paste format only | Ctrl+Alt+V |
-| insert-row | Insert row | - |
-| insert-column | Insert column | - |
-| delete-row | Delete row | - |
-| delete-column | Delete column | - |
-| delete-cell-text | Delete cell text | Delete |
-| hide | Hide | - |
-| validation | Data validations | - |
-| cell-printable | Enable export | - |
-| cell-non-printable | Disable export | - |
-| cell-editable | Enable editing | - |
-| cell-non-editable | Disable editing | - |
+```mermaid
+flowchart TB
+    CM["Context Menu"]
+    
+    CM --> CB["Clipboard"]
+    CB --> CC["Copy"]
+    CB --> CU["Cut"]
+    CB --> CP["Paste"]
+    CB --> CPV["Paste Values Only"]
+    CB --> CPF["Paste Format Only"]
+    
+    CM --> IN["Insert"]
+    IN --> IR["Insert Row"]
+    IN --> IC["Insert Column"]
+    
+    CM --> DE["Delete"]
+    DR["Delete Row"]
+    DC["Delete Column"]
+    DT["Delete Cell Text"]
+    
+    CM --> HI["Hide"]
+    
+    CM --> VA["Validation"]
+    
+    CM --> PR["Printable"]
+    PE["Enable Export"]
+    PNE["Disable Export"]
+    
+    CM --> ED["Editable"]
+    EE["Enable Editing"]
+    ENE["Disable Editing"]
+```
 
 ---
 
 ## Auto-Filter System
 
-Located in: `src/core/auto_filter.js`
+### Auto-Filter Architecture
 
-### Enabling Auto-Filter
-
-```javascript
-// Enable filter
-dataProxy.autofilter();
-
-// Disable filter
-dataProxy.autofilter();  // Toggle
-```
-
-### Filter Operations
-
-```javascript
-// Add filter to column
-dataProxy.setAutoFilter(ci, order, operator, value);
-
-// Get filtered rows
-const { rset, fset } = autoFilter.filteredRows((r, c) => rows.getCell(r, c));
+```mermaid
+flowchart LR
+    subgraph Enable["Enable Filter"]
+        AF1["Select range"]
+        AF2["Click Filter button"]
+        AF3["Set filter range"]
+        AF4["Add filter icon"]
+    end
+    
+    subgraph FilterOps["Filter Operations"]
+        FO1["Click dropdown"]
+        FO2["Select criteria"]
+        FO3["Apply filter"]
+    end
+    
+    subgraph SortOps["Sort Operations"]
+        SO1["Select column"]
+        SO2["Click Sort Asc/Desc"]
+        SO3["Reorder rows"]
+    end
+    
+    subgraph Clear["Clear Filter"]
+        CF1["Click Filter button"]
+        CF2["Remove filter"]
+    end
+    
+    AF1 --> AF2
+    AF2 --> AF3
+    AF3 --> AF4
+    
+    AF4 --> FO1
+    FO1 --> FO2
+    FO2 --> FO3
+    
+    FO3 --> SO1
+    SO1 --> SO2
+    SO2 --> SO3
+    
+    CF1 --> CF2
 ```
 
 ### Filter Configuration
@@ -1414,7 +1767,33 @@ const { rset, fset } = autoFilter.filteredRows((r, c) => rows.getCell(r, c));
 
 ## Freeze Panes
 
-Located in: `src/core/data_proxy.js` (freeze methods)
+### Freeze Types Diagram
+
+```mermaid
+flowchart TB
+    subgraph "No Freeze"
+        NF1["Normal scroll"]
+        NF2["All rows/cols move"]
+    end
+    
+    subgraph "Freeze Row"
+        FR1["Click Freeze > Freeze Row"]
+        FR2["First row stays visible"]
+        FR3["Scroll below row 1"]
+    end
+    
+    subgraph "Freeze Column"
+        FC1["Click Freeze > Freeze Column"]
+        FC2["First col stays visible"]
+        FC3["Scroll past col A"]
+    end
+    
+    subgraph "Freeze Both"
+        FB1["Click Freeze > Freeze Cells"]
+        FB2["Row AND column fixed"]
+        FB3["Diagonal freeze area"]
+    end
+```
 
 ### Freeze Configuration
 
@@ -1442,97 +1821,161 @@ dataProxy.setFreeze(2, 2);
 
 ## Style Management
 
-Located in: `src/core/data_proxy.js` (style methods)
+### Style System Architecture
 
-### Style Sharing
-
-Styles are automatically shared to minimize memory:
-
-```javascript
-// Add style returning index (or existing match)
-const styleIndex = dataProxy.addStyle({
-  bgcolor: '#f0f0f0',
-  align: 'center'
-});
+```mermaid
+flowchart LR
+    subgraph Define["Define Style"]
+        DS1["Create style object"]
+        DS2["Set properties"]
+    end
+    
+    subgraph Store["Store Style"]
+        ST1["Check existing styles"]
+        ST2["Return existing index OR add new"]
+    end
+    
+    subgraph Apply["Apply Style"]
+        AS1["Assign style index to cell"]
+        AS2["Render with style"]
+    end
+    
+    Define --> ST1
+    ST1 -->|Exists| AS1
+    ST1 -->|New| DS2
+    DS2 --> ST2
+    ST2 --> AS1
+    AS1 --> AS2
 ```
 
-### Style Inheritance
+**Style Sharing Strategy:**
 
-Cell styles inherit from default style:
-
-```javascript
-// Get merged style (default + cell style)
-const fullStyle = dataProxy.getCellStyleOrDefault(ri, ci);
-```
+- Identical styles share a single index
+- Reduces memory footprint
+- Faster rendering
 
 ---
 
 ## Undo/Redo System
 
-Located in: `src/core/history.js`
+### History System Diagram
 
-### History Operations
-
-```javascript
-// Check if undo available
-const canUndo = dataProxy.canUndo();
-
-// Check if redo available
-const canRedo = dataProxy.canRedo();
-
-// Undo last action
-dataProxy.undo();
-
-// Redo last undone action
-dataProxy.redo();
+```mermaid
+flowchart LR
+    subgraph State["Initial State"]
+        S0["Data: {}"]
+    end
+    
+    subgraph Change1["Change 1"]
+        C1["Add: A1=100"]
+        U1["Undo Stack: [S0]"]
+        R1["Redo Stack: []"]
+    end
+    
+    subgraph Change2["Change 2"]
+        C2["Add: B1=200"]
+        U2["Undo Stack: [S0, S1]"]
+        R2["Redo Stack: []"]
+    end
+    
+    subgraph Undo["Undo Operation"]
+        UO["Pop from Undo"]
+        UO2["Push to Redo"]
+        UO3["Restore data"]
+    end
+    
+    subgraph Redo["Redo Operation"]
+        RO["Pop from Redo"]
+        RO2["Push to Undo"]
+        RO3["Restore data"]
+    end
+    
+    S0 --> C1
+    C1 --> C2
+    C2 --> UO
+    UO --> UO2
+    UO2 --> UO3
+    UO --> RO
+    RO --> RO2
+    RO2 --> RO3
 ```
-
-### History Stack
-
-The history system maintains unlimited undo/redo:
-- Each change creates a history entry
-- Undo pops from undo stack, pushes to redo stack
-- Redo pops from redo stack, pushes to undo stack
-- New action clears redo stack
 
 ---
 
 ## Clipboard Operations
 
-Located in: `src/core/clipboard.js`
+### Clipboard Flow Diagram
 
-### Clipboard Operations
-
-```javascript
-// Copy selection
-dataProxy.copy();
-
-// Copy to system clipboard
-dataProxy.copyToSystemClipboard(event);
-
-// Cut selection
-dataProxy.cut();
-
-// Paste
-dataProxy.paste('all');  // 'all' | 'text' | 'format'
-
-// Paste from system clipboard
-dataProxy.pasteFromSystemClipboard(resetSheet, eventTrigger);
+```mermaid
+flowchart TB
+    subgraph CopyProcess["Copy Process"]
+        CP1["Get selection range"]
+        CP2["Read cell data"]
+        CP3["Format as TSV"]
+        CP4["Copy to clipboard API"]
+    end
+    
+    subgraph PasteProcess["Paste Process"]
+        PP1["Get clipboard data"]
+        PP2["Parse TSV content"]
+        PP3["Calculate target range"]
+        PP4["Validate target"]
+        PP5["Copy data + format"]
+    end
+    
+    subgraph ErrorCheck["Error Handling"]
+        EC1["Check merged cells"]
+        EC2["Check dimensions"]
+    end
+    
+    CP1 --> CP2
+    CP2 --> CP3
+    CP3 --> CP4
+    
+    PP1 --> PP2
+    PP2 --> PP3
+    PP3 --> EC1
+    EC1 --> EC2
+    EC2 -->|Valid| PP4
+    EC2 -->|Invalid| PPError["Show Error"]
 ```
-
-### Paste Modes
-
-| Mode | Description |
-|------|-------------|
-| `'all'` | Paste values and formatting |
-| `'text'` | Paste values only |
-| `'format'` | Paste formatting only |
 
 ---
 
 ## Internationalization
 
-Located in: `src/locale/`
+### Locale System
+
+```mermaid
+classDiagram
+    class Locale {
+        +string currentLang
+        +Object messages
+        +setLocale(lang, messages)
+        +t(key) string
+    }
+    
+    class Message {
+        +toolbar: Object
+        +contextmenu: Object
+        +format: Object
+        +formula: Object
+        +validation: Object
+        +error: Object
+        +calendar: Object
+        +button: Object
+        +sort: Object
+        +filter: Object
+    }
+    
+    class Lang {
+        +string code
+        +string name
+    }
+    
+    Locale --> Message
+    Message --> Lang
+```
 
 ### Supported Languages
 
@@ -1544,95 +1987,207 @@ Located in: `src/locale/`
 | `'de'` | German |
 | `'nl'` | Dutch |
 
-### Using Locale
-
-```javascript
-// Set language
-x_spreadsheet.locale('zh-cn');
-
-// Custom messages
-x_spreadsheet.locale('custom', {
-  toolbar: {
-    undo: '撤销',
-    redo: '重做',
-    // ...
-  },
-  contextmenu: {
-    // ...
-  }
-});
-```
-
 ---
 
 ## Rendering System
 
-### Canvas Rendering
+### Canvas Rendering Pipeline
 
-Located in: `src/canvas/draw.js`
+```mermaid
+flowchart LR
+    subgraph Init["Initialization"]
+        R1["Create canvas element"]
+        R2["Get 2D context"]
+        R3["Set device pixel ratio"]
+    end
+    
+    subgraph Frame["Render Frame"]
+        RF1["Clear canvas"]
+        RF2["Save context state"]
+    end
+    
+    subgraph Grid["Draw Grid"]
+        RG1["Draw col headers"]
+        RG2["Draw row headers"]
+        RG3["Draw grid lines"]
+    end
+    
+    subgraph Cell["Draw Cells"]
+        RC1["For each visible row"]
+        RC2["For each visible col"]
+        RC3["Draw background"]
+        RC4["Draw border"]
+        RC5["Draw text"]
+    end
+    
+    subgraph Selection["Draw Selection"]
+        RS1["Draw highlight"]
+        RS2["Draw active border"]
+    end
+    
+    subgraph Restore["Restore"]
+        RR1["Restore context state"]
+    end
+    
+    R1 --> R2
+    R2 --> R3
+    
+    R3 --> RF1
+    RF1 --> RF2
+    RF2 --> RG1
+    RG1 --> RG2
+    RG2 --> RG3
+    RG3 --> RC1
+    RC1 --> RC2
+    RC2 --> RC3
+    RC3 --> RC4
+    RC4 --> RC5
+    RC5 --> RS1
+    RS1 --> RS2
+    RS2 --> RR1
+```
 
-### Render Cycle
-
-1. **Clear canvas**: Clear previous frame
-2. **Draw grid**: Grid lines and headers
-3. **Draw cells**: Cell backgrounds and borders
-4. **Draw content**: Text and numbers
-5. **Draw selection**: Selection highlights
-6. **Draw editor**: Mobile inline editor
-
-### Device Pixel Ratio
+### Device Pixel Ratio Handling
 
 ```javascript
 const dpr = window.devicePixelRatio || 1;
+
+// Scale context
 ctx.scale(dpr, dpr);
+
+// Resize canvas
+el.width = npx(width);
+el.height = npx(height);
+
+// CSS size
+el.style.width = `${width}px`;
+el.style.height = `${height}px`;
 ```
 
-This ensures crisp rendering on high-DPI displays.
+---
+
+## Expression Parser
+
+### Infix to Suffix Conversion
+
+The expression parser converts mathematical expressions from infix notation (standard) to suffix notation (Reverse Polish Notation) for easier evaluation:
+
+```mermaid
+flowchart TB
+    subgraph Input["Input: 9+(3-1)*3+10/2"]
+        I1["Parse character by character"]
+    end
+    
+    subgraph Process["Processing"]
+        P1["Push operands to stack"]
+        P2["Push operators to operator stack"]
+        P3["Handle parentheses"]
+        P4["Apply operator precedence"]
+    end
+    
+    subgraph Output["Output: 9 3 1-3*+ 10 2/"]
+        O1["Pop remaining operators"]
+        O2["Return suffix expression"]
+    end
+    
+    I1 --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+    P4 --> O1
+    O1 --> O2
+```
+
+### Algorithm
+
+```javascript
+// src: include chars: [0-9], +, -, *, /
+// Input: 9+(3-1)*3+10/2
+// Output: 9 3 1-3*+ 10 2/
+const infix2suffix = (src) => {
+  const operatorStack = [];
+  const stack = [];
+  
+  for (let i = 0; i < src.length; i += 1) {
+    const c = src.charAt(i);
+    
+    if (c >= '0' && c <= '9') {
+      stack.push(c);                    // Push operand
+    } else if (c === ')') {
+      let c1 = operatorStack.pop();
+      while (c1 !== '(') {
+        stack.push(c1);             // Pop until (
+        c1 = operatorStack.pop();
+      }
+    } else {
+      // Priority: */ > +-
+      if (operatorStack.length > 0 && (c === '+' || c === '-')) {
+        const last = operatorStack[operatorStack.length - 1];
+        if (last === '*' || last === '/') {
+          while (operatorStack.length > 0) {
+            stack.push(operatorStack.pop());
+          }
+        }
+      }
+      operatorStack.push(c);            // Push operator
+    }
+  }
+  
+  while (operatorStack.length > 0) {
+    stack.push(operatorStack.pop());
+  }
+  
+  return stack;
+};
+```
 
 ---
 
 ## Performance Optimization
 
-### Large Dataset Handling
+### Performance Strategies
 
-#### Virtual Scrolling
-
-Only visible cells are rendered:
-
-```javascript
-// Located in: src/core/data_proxy.js
-viewRange() {
-  // Calculate visible range only
-  let { ri, ci } = scroll;
-  // ... render only visible cells
-}
-```
-
-#### Style Sharing
-
-Identical styles share a single index:
-
-```javascript
-// Style deduplication
-addStyle(nstyle) {
-  for (let i = 0; i < styles.length; i += 1) {
-    if (equals(style, nstyle)) return i;  // Return existing
-  }
-  styles.push(nstyle);  // Add new
-  return styles.length - 1;
-}
-```
-
-#### Sparse Array Storage
-
-Only non-empty cells are stored:
-
-```javascript
-// Sparse object storage
-cells: {
-  0: { text: 'Value' },
-  5: { text: 'Another' }
-}
+```mermaid
+flowchart TB
+    subgraph Virtual["Virtual Scrolling"]
+        V1["Calculate visible range"]
+        V2["Skip off-screen cells"]
+        V3["Only render visible"]
+    end
+    
+    subgraph Style["Style Sharing"]
+        S1["Check identical styles"]
+        S2["Return existing index"]
+        S3["Reduce memory"]
+    end
+    
+    subgraph Sparse["Sparse Storage"]
+        SP1["Store only non-empty"]
+        SP2["Skip empty cells"]
+        SP3["Reduce memory"]
+    end
+    
+    subgraph Batch["Batch Updates"]
+        B1["Use loadData()"]
+        B2["Single re-render"]
+        B3["Better performance"]
+    end
+    
+    Virtual --> V1
+    V1 --> V2
+    V2 --> V3
+    
+    Style --> S1
+    S1 --> S2
+    S2 --> S3
+    
+    Sparse --> SP1
+    SP1 --> SP2
+    SP2 --> SP3
+    
+    Batch --> B1
+    B1 --> B2
+    B2 --> B3
 ```
 
 ### Best Practices
@@ -1641,27 +2196,28 @@ cells: {
 2. **Use lazy loading**: Load data on demand
 3. **Batch updates**: Use loadData() instead of individual updates
 4. **Disable unnecessary features**: Hide toolbar, grid when not needed
+5. **Limit viewport**: Use view dimensions for limited viewport
 
 ---
 
 ## Common Patterns
 
-### Data Persistence
+### Data Persistence Pattern
 
 ```javascript
-// Save to localStorage
+// Auto-save on change
 spreadsheet.change((data) => {
   localStorage.setItem('spreadsheet-data', JSON.stringify(data));
 });
 
-// Load from localStorage
+// Load on init
 const saved = localStorage.getItem('spreadsheet-data');
 if (saved) {
   spreadsheet.loadData(JSON.parse(saved));
 }
 ```
 
-### Export to JSON
+### Export to JSON Pattern
 
 ```javascript
 const exportData = () => {
@@ -1676,7 +2232,7 @@ const exportData = () => {
 };
 ```
 
-### Import from JSON
+### Import from JSON Pattern
 
 ```javascript
 const importData = (file) => {
@@ -1689,7 +2245,7 @@ const importData = (file) => {
 };
 ```
 
-### Custom Export
+### Export to CSV Pattern
 
 ```javascript
 const exportCSV = () => {
@@ -1697,7 +2253,6 @@ const exportCSV = () => {
   const rows = data[0].rows;
   let csv = '';
   
-  // Generate CSV
   for (let i = 0; i < rows.len; i += 1) {
     const row = rows[i];
     if (row && row.cells) {
@@ -1706,9 +2261,12 @@ const exportCSV = () => {
     }
   }
   
-  // Download
   const blob = new Blob([csv], { type: 'text/csv' });
-  // ... download logic
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'spreadsheet.csv';
+  a.click();
 };
 ```
 
@@ -1716,55 +2274,121 @@ const exportCSV = () => {
 
 ## Troubleshooting
 
-### Common Issues
+### Common Issues Flowchart
 
-#### 1. Formulas Not Calculating
+```mermaid
+flowchart TB
+    subgraph Issue["Common Issues"]
+        I1["Formulas Not Calculating"]
+        I2["Paste Not Working"]
+        I3["Performance Issues"]
+        I4["CSS Not Loading"]
+        I5["Cells Not Editable"]
+    end
+    
+    subgraph Solution1["Formulas"]
+        S1A["Check = prefix"]
+        S1B["Verify references"]
+        S1C["Check syntax"]
+    end
+    
+    subgraph Solution2["Paste"]
+        S2A["Use HTTPS"]
+        S2B["Check permissions"]
+        S2C["Try right-click"]
+    end
+    
+    subgraph Solution3["Performance"]
+        S3A["Reduce defaults"]
+        S3B["Disable features"]
+        S3C["Limit viewport"]
+    end
+    
+    subgraph Solution4["CSS"]
+        S4A["Include CSS"]
+        S4B["Check paths"]
+        S4C["Verify load order"]
+    end
+    
+    subgraph Solution5["Editable"]
+        S5A["Check mode option"]
+        S5B["Check validation"]
+    end
+    
+    I1 --> S1A
+    S1A --> S1B
+    S1B --> S1C
+    
+    I2 --> S2A
+    S2A --> S2B
+    S2B --> S2C
+    
+    I3 --> S3A
+    S3A --> S3B
+    S3B --> S3C
+    
+    I4 --> S4A
+    S4A --> S4B
+    S4B --> S4C
+    
+    I5 --> S5A
+    S5A --> S5B
+```
 
-**Symptoms**: Formula shows as text, not result.
+---
 
-**Solutions**:
-- Ensure formula starts with `=`
-- Check for valid cell references
-- Verify formula syntax
+## Migration Guide
 
-#### 2. Paste Not Working
+### Migration from DOM-based Spreadsheets
 
-**Symptoms**: Ctrl+V doesn't paste.
+```mermaid
+flowchart LR
+    subgraph Before["Before (DOM-based)"]
+        B1["<table> element"]
+        B2["<td> cells"]
+        B3["Manual rendering"]
+    end
+    
+    subgraph Migration["Migration"]
+        M1["Add container div"]
+        M2["Install library"]
+        M3["Create instance"]
+    end
+    
+    subgraph After["After (Canvas)"]
+        A1["<div id='xlsx'>"]
+        A2["x-spreadsheet"]
+        A3["Canvas rendering"]
+    end
+    
+    B1 --> M1
+    B2 --> M2
+    B3 --> M3
+    
+    M1 --> A1
+    M2 --> A2
+    M3 --> A3
+```
 
-**Solutions**:
-- Use HTTPS (required for clipboard API)
-- Check browser permissions
-- Try right-click menu paste
+### Code Comparison
 
-#### 3. Performance Issues
-
-**Symptoms**: Slow with large data.
-
-**Solutions**:
-- Reduce default row/column count
-- Disable unused features
-- Use view dimensions for limited viewport
-
-#### 4. CSS Not Loading
-
-**Symptoms**: Unstyled spreadsheet.
-
-**Solutions**:
-- Include xspreadsheet.css after JS
-- Check file paths
-- Verify CSS loads before JS
-
-#### 5. Cells Not Editable
-
-**Symptoms**: Cannot type in cells.
-
-**Solutions**:
+**Before (DOM):**
 ```javascript
-// Check mode option
-const spreadsheet = Spreadsheet('#el', { mode: 'edit' });
+const table = document.createElement('table');
+const row = document.createElement('tr');
+const cell = document.createElement('td');
+cell.textContent = 'Value';
+table.appendChild(row);
+```
 
-// Check data validation
-// Ensure cell is not set to non-editable via context menu
+**After (x-spreadsheet):**
+```javascript
+const spreadsheet = Spreadsheet('#container');
+spreadsheet.loadData([{
+  rows: {
+    1: { cells: { 0: { text: 'Value' } } }
+  }
+}]);
 ```
 
 ---
