@@ -898,11 +898,11 @@ body {
 
 // form begin
 .@{css-prefix}-form-input {
-  font-size: 1em;
+  font-size: 14px;
   position: relative;
   font-weight: 400;
   display: inline-flex;
-  color: rgba(0,0,0,.87);
+  color: #374151;
 
   input {
     z-index: 1;
@@ -914,16 +914,17 @@ body {
     text-align: left;
     line-height: @form-field-height;
     height: @form-field-height;
-    padding: 0 8px;
-    background: #fff;
-    border: 1px solid #e9e9e9;
-    border-radius: 3px;
-    transition: box-shadow .1s ease,border-color .1s ease;
-    box-shadow: inset 0 1px 2px hsla(0,0%,4%,.06);
+    padding: 0 12px;
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: @border-radius;
+    transition: box-shadow 0.2s ease,border-color 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    font-size: 14px;
 
     &:focus {
-      border-color: rgb(75, 137, 255);
-      box-shadow: inset 0 1px 2px rgba(75, 137, 255, .2);
+      border-color: @selection-color;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
   }
 }
@@ -931,22 +932,23 @@ body {
 .@{css-prefix}-form-select {
   position: relative;
   display: inline-block;
-  background: #fff;
-  border: @input-border;
-  border-radius: 2px;
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-radius: @border-radius;
   cursor: pointer;
-  color: rgba(0,0,0,.87);
+  color: #374151;
   user-select: none;
-  box-shadow: inset 0 1px 2px hsla(0,0%,4%,.06);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 
   .input-text {
     text-overflow: ellipsis;
     white-space: nowrap;
-    min-width: 60px;
+    min-width: 80px;
     width: auto;
     height: @form-field-height;
     line-height: @form-field-height;
-    padding: 0 8px;
+    padding: 0 12px;
+    font-size: 14px;
   }
 }
 .@{css-prefix}-form-fields {
@@ -958,15 +960,17 @@ body {
     flex: 0 1 auto;
     .label {
       display: inline-block;
-      margin: 0 10px 0 0;
+      margin: 0 12px 0 0;
+      font-weight: 500;
+      color: #4B5563;
     }
   }
 }
 .@{css-prefix}-form-field {
   display: block;
   vertical-align: middle;
-  margin-left: 10px;
-  margin-bottom: 10px;
+  margin-left: 12px;
+  margin-bottom: 12px;
 
   &:first-child {
     margin-left: 0;
@@ -974,13 +978,14 @@ body {
 
   &.error {
     .@{css-prefix}-form-select, input {
-      border-color: #f04134;
+      border-color: #EF4444;
     }
   }
 
   .tip {
-    color: #f04134;
-    font-size: .9em;
+    color: #EF4444;
+    font-size: 13px;
+    margin-top: 4px;
   }
 }
 // form end
