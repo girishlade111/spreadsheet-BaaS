@@ -367,9 +367,10 @@ body {
   }
   .@{css-prefix}-selector-area {
     position: absolute;
-    border: 2px solid rgb(75, 137, 255);
-    background: rgba(75, 137, 255, .1);
+    border: 2px solid @selection-color;
+    background: @selection-bg;
     z-index: 5;
+    border-radius: 2px;
   }
   .@{css-prefix}-selector-clipboard, .@{css-prefix}-selector-autofill {
     position: absolute;
@@ -377,22 +378,23 @@ body {
     z-index: 100;
   }
   .@{css-prefix}-selector-clipboard {
-    border: 2px dashed rgb(75, 137, 255);
+    border: 2px dashed @selection-color;
   }
   .@{css-prefix}-selector-autofill {
-    border: 1px dashed rgba(0, 0, 0, .45); // #606060; // rgba(0, 0, 0, .2);
+    border: 1px dashed rgba(96, 96, 96, 0.6);
   }
   .@{css-prefix}-selector-corner {
     pointer-events: auto;
     position: absolute;
     cursor: crosshair;
     font-size: 0;
-    height: 5px;
-    width: 5px;
-    right: -5px;
-    bottom: -5px;
-    border: 2px solid rgb(255, 255, 255);
-    background: rgb(75, 137, 255);
+    height: 8px;
+    width: 8px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #FFFFFF;
+    background: @selection-color;
+    border-radius: 2px;
   }
 }
 .@{css-prefix}-editor {
