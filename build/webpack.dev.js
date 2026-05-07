@@ -14,16 +14,18 @@ module.exports = merge(common, {
       title: 'x-spreadsheet',
     }),
     new MiniCssExtractPlugin({
-      filename: 'xspreadsheet.css',
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: '[name].[contenthash].css',
+      // chunkFilename: devMode ? '[id].[hash].css' : '[id].css',
     }),
   ],
   output: {
-    filename: 'xspreadsheet.js',
+    filename: '[name].[contenthash].js',
   },
   devtool: 'inline-source-map',
   devServer: {
     host: 'localhost',
-    port: 8080,
-    contentBase: './dist',
+    contentBase: '../dist',
   },
 });
