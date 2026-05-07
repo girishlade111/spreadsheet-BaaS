@@ -3,121 +3,151 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>x-spreadsheet</title>
-    
-<link href="xspreadsheet.css" rel="stylesheet"></head>
-<body onload="load()">
-  <div id="x-spreadsheet-demo"></div>
+  <title>Spreadsheet Pro</title>
+  <link href="xspreadsheet.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F9FAFB; min-height: 100vh; }
+    .landing-page, .spreadsheet-page { display: none; }
+    .landing-page.active, .spreadsheet-page.active { display: block; }
+    .header { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 32px; height: 32px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .logo svg { width: 20px; height: 20px; fill: white; }
+    .app-title { font-size: 18px; font-weight: 600; color: #1F2937; }
+    .header-right { display: flex; align-items: center; gap: 12px; position: relative; }
+    .btn-new { display: inline-flex; align-items: center; gap: 6px; background: #3B82F6; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn-new:hover { background: #2563EB; }
+    .btn-new svg { width: 16px; height: 16px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: #4B5563; border: 1px solid #E5E7EB; padding: 8px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .dashboard { padding: 32px 24px; max-width: 1200px; margin: 0 auto; }
+    .section-title { font-size: 14px; font-weight: 500; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .project-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; padding: 20px; cursor: pointer; position: relative; }
+    .project-card:hover { border-color: #3B82F6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .project-name { font-size: 15px; font-weight: 600; color: #1F2937; margin-bottom: 8px; }
+    .project-meta { font-size: 13px; color: #6B7280; }
+    .project-meta span { display: block; margin-bottom: 4px; }
+    .project-delete { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 4px; background: #FEE2E2; color: #EF4444; border: none; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 16px; }
+    .project-card:hover .project-delete { display: flex; }
+    .project-delete:hover { background: #EF4444; color: #fff; }
+    .template-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 220px; z-index: 200; display: none; }
+    .template-dropdown.show { display: block; }
+    .template-option { padding: 12px 16px; cursor: pointer; }
+    .template-option:hover { background: #F3F4F6; }
+    .template-name { font-weight: 500; color: #1F2937; }
+    .template-desc { font-size: 12px; color: #6B7280; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #6B7280; grid-column: 1/-1; }
+    .empty-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .empty-state h3 { font-size: 18px; color: #1F2937; margin-bottom: 8px; }
+    #x-spreadsheet-demo { height: calc(100vh - 65px); }
+  </style>
+</head>
+<body onload="init()">
+  <div id="landing" class="landing-page">
+    <header class="header">
+      <div class="header-left">
+        <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h6v2H7v-2z"/></svg></div>
+        <span class="app-title">Spreadsheet Pro</span>
+      </div>
+      <div class="header-right">
+        <button class="btn-new" onclick="toggleTemplates()" id="newBtn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          New Project
+        </button>
+        <div id="templateDropdown" class="template-dropdown">
+          <div class="template-option" onclick="createProject('basic')"><div class="template-name">Basic Template</div><div class="template-desc">Simple headers with sample data</div></div>
+          <div class="template-option" onclick="createProject('budget')"><div class="template-name">Budget Tracker</div><div class="template-desc">Budget, Actual, Difference columns</div></div>
+          <div class="template-option" onclick="createProject('datalog')"><div class="template-name">Data Log</div><div class="template-desc">Date, Description, Amount, Status</div></div>
+          <div class="template-option" onclick="createProject('inventory')"><div class="template-name">Inventory</div><div class="template-desc">Item, Quantity, Price, Total</div></div>
+          <div class="template-option" onclick="createProject('multisheet')"><div class="template-name">Multi-sheet</div><div class="template-desc">Summary + Details sheets</div></div>
+        </div>
+      </div>
+    </header>
+    <div class="dashboard">
+      <div class="section-title">Recent Projects</div>
+      <div id="projectsGrid" class="projects-grid"></div>
+    </div>
+  </div>
+  <div id="spreadsheetPage" class="spreadsheet-page">
+    <header class="header">
+      <div class="header-left">
+        <button class="back-btn" onclick="goToDashboard()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          Dashboard
+        </button>
+      </div>
+      <div class="header-right">
+        <span id="currentProjectName" class="app-title" style="font-size:15px;margin-right:12px;"></span>
+        <button class="btn-new" onclick="saveCurrentProject()" style="background:#10B981;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+          Save
+        </button>
+      </div>
+    </header>
+    <div id="x-spreadsheet-demo"></div>
+  </div>
+  <script src="xspreadsheet.js"></script>
   <script>
-    function load(){
-      const rows10 = { len: 1000 };
-      for (let i = 0; i < 1000; i += 1) {
-        rows10[i] = {
-          cells: {
-            0: { text: 'A-' + i },
-            1: { text: 'B-' + i },
-            2: { text: 'C-' + i },
-            3: { text: 'D-' + i },
-            4: { text: 'E-' + i },
-            5: { text: 'F-' + i },
-          }
-        };
-      }
-      const rows = {
-        len: 80,
-        1: {
-          cells: {
-            0: { text: 'testingtesttestetst' },
-            2: { text: 'testing' },
-          },
-        },
-        2: {
-          cells: {
-            0: { text: 'render', style: 0 },
-            1: { text: 'Hello' },
-            2: { text: 'haha', merge: [1, 1] },
-          }
-        },
-        8: {
-          cells: {
-            8: { text: 'border test', style: 0 },
-          }
-        }
-      };
-      // x_spreadsheet.locale('zh-cn');
-      var saveIcon = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNTc3MTc3MDkyOTg4IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjI2NzgiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxkZWZzPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+PC9zdHlsZT48L2RlZnM+PHBhdGggZD0iTTIxMy4zMzMzMzMgMTI4aDU5Ny4zMzMzMzRhODUuMzMzMzMzIDg1LjMzMzMzMyAwIDAgMSA4NS4zMzMzMzMgODUuMzMzMzMzdjU5Ny4zMzMzMzRhODUuMzMzMzMzIDg1LjMzMzMzMyAwIDAgMS04NS4zMzMzMzMgODUuMzMzMzMzSDIxMy4zMzMzMzNhODUuMzMzMzMzIDg1LjMzMzMzMyAwIDAgMS04NS4zMzMzMzMtODUuMzMzMzMzVjIxMy4zMzMzMzNhODUuMzMzMzMzIDg1LjMzMzMzMyAwIDAgMSA4NS4zMzMzMzMtODUuMzMzMzMzeiBtMzY2LjkzMzMzNCAxMjhoMzQuMTMzMzMzYTI1LjYgMjUuNiAwIDAgMSAyNS42IDI1LjZ2MTE5LjQ2NjY2N2EyNS42IDI1LjYgMCAwIDEtMjUuNiAyNS42aC0zNC4xMzMzMzNhMjUuNiAyNS42IDAgMCAxLTI1LjYtMjUuNlYyODEuNmEyNS42IDI1LjYgMCAwIDEgMjUuNi0yNS42ek0yMTMuMzMzMzMzIDIxMy4zMzMzMzN2NTk3LjMzMzMzNGg1OTcuMzMzMzM0VjIxMy4zMzMzMzNIMjEzLjMzMzMzM3ogbTEyOCAwdjI1NmgzNDEuMzMzMzM0VjIxMy4zMzMzMzNoODUuMzMzMzMzdjI5OC42NjY2NjdhNDIuNjY2NjY3IDQyLjY2NjY2NyAwIDAgMS00Mi42NjY2NjcgNDIuNjY2NjY3SDI5OC42NjY2NjdhNDIuNjY2NjY3IDQyLjY2NjY2NyAwIDAgMS00Mi42NjY2NjctNDIuNjY2NjY3VjIxMy4zMzMzMzNoODUuMzMzMzMzek0yNTYgMjEzLjMzMzMzM2g4NS4zMzMzMzMtODUuMzMzMzMzeiBtNDI2LjY2NjY2NyAwaDg1LjMzMzMzMy04NS4zMzMzMzN6IG0wIDU5Ny4zMzMzMzR2LTEyOEgzNDEuMzMzMzMzdjEyOEgyNTZ2LTE3MC42NjY2NjdhNDIuNjY2NjY3IDQyLjY2NjY2NyAwIDAgMSA0Mi42NjY2NjctNDIuNjY2NjY3aDQyNi42NjY2NjZhNDIuNjY2NjY3IDQyLjY2NjY2NyAwIDAgMSA0Mi42NjY2NjcgNDIuNjY2NjY3djE3MC42NjY2NjdoLTg1LjMzMzMzM3ogbTg1LjMzMzMzMyAwaC04NS4zMzMzMzMgODUuMzMzMzMzek0zNDEuMzMzMzMzIDgxMC42NjY2NjdIMjU2aDg1LjMzMzMzM3oiIHAtaWQ9IjI2NzkiIGZpbGw9IiMyYzJjMmMiPjwvcGF0aD48L3N2Zz4='
-      var previewEl = document.createElement('img')
-      previewEl.src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjIxMzI4NTkxMjQzIiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjU2NjMiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNNTEyIDE4Ny45MDRhNDM1LjM5MiA0MzUuMzkyIDAgMCAwLTQxOC41NiAzMTUuNjQ4IDQzNS4zMjggNDM1LjMyOCAwIDAgMCA4MzcuMTIgMEE0MzUuNDU2IDQzNS40NTYgMCAwIDAgNTEyIDE4Ny45MDR6TTUxMiAzMjBhMTkyIDE5MiAwIDEgMSAwIDM4NCAxOTIgMTkyIDAgMCAxIDAtMzg0eiBtMCA3Ni44YTExNS4yIDExNS4yIDAgMSAwIDAgMjMwLjQgMTE1LjIgMTE1LjIgMCAwIDAgMC0yMzAuNHpNMTQuMDggNTAzLjQ4OEwxOC41NiA0ODUuNzZsNC44NjQtMTYuMzg0IDQuOTI4LTE0Ljg0OCA4LjA2NC0yMS41NjggNC4wMzItOS43OTIgNC43MzYtMTAuODggOS4zNDQtMTkuNDU2IDEwLjc1Mi0yMC4wOTYgMTIuNjA4LTIxLjMxMkE1MTEuNjE2IDUxMS42MTYgMCAwIDEgNTEyIDExMS4xMDRhNTExLjQ4OCA1MTEuNDg4IDAgMCAxIDQyNC41MTIgMjI1LjY2NGwxMC4yNCAxNS42OGMxMS45MDQgMTkuMiAyMi41OTIgMzkuMTA0IDMyIDU5Ljc3NmwxMC40OTYgMjQuOTYgNC44NjQgMTMuMTg0IDYuNCAxOC45NDQgNC40MTYgMTQuODQ4IDQuOTkyIDE5LjM5Mi0zLjIgMTIuODY0LTMuNTg0IDEyLjgtNi40IDIwLjA5Ni00LjQ4IDEyLjYwOC00Ljk5MiAxMi45MjhhNTExLjM2IDUxMS4zNiAwIDAgMS0xNy4yOCAzOC40bC0xMi4wMzIgMjIuNC0xMS45NjggMjAuMDk2QTUxMS41NTIgNTExLjU1MiAwIDAgMSA1MTIgODk2YTUxMS40ODggNTExLjQ4OCAwIDAgMS00MjQuNDQ4LTIyNS42bC0xMS4zMjgtMTcuNTM2YTUxMS4yMzIgNTExLjIzMiAwIDAgMS0xOS44NC0zNS4wMDhMNTMuMzc2IDYxMS44NGwtOC42NC0xOC4yNC0xMC4xMTItMjQuMTI4LTcuMTY4LTE5LjY0OC04LjMyLTI2LjYyNC0yLjYyNC05Ljc5Mi0yLjQ5Ni05LjkyeiIgcC1pZD0iNTY2NCI+PC9wYXRoPjwvc3ZnPg=='
-      previewEl.width = 16
-      previewEl.height = 16
-
-      var xs = x_spreadsheet('#x-spreadsheet-demo', {
-        showToolbar: true,
-        showGrid: true,
-        showBottomBar: true,
-        extendToolbar: {
-          left: [
-            {
-              tip: 'Save',
-              icon: saveIcon,
-              onClick: (data, sheet) => {
-                console.log('click save button：', data, sheet)
-              }
-            }
-          ],
-          right: [
-            {
-              tip: 'Preview',
-              el: previewEl,
-              onClick: (data, sheet) => {
-                console.log('click preview button：', data)
-              }
-            }
-          ],
-        }
-      })
-        .loadData([{
-          freeze: 'B3',
-          styles: [
-            {
-              bgcolor: '#f4f5f8',
-              textwrap: true,
-              color: '#900b09',
-              border: {
-                top: ['thin', '#0366d6'],
-                bottom: ['thin', '#0366d6'],
-                right: ['thin', '#0366d6'],
-                left: ['thin', '#0366d6'],
-              },
-            },
-          ],
-          merges: [
-            'C3:D4',
-          ],
-          cols: {
-            len: 10,
-            2: { width: 200 },
-          },
-          rows,
-        }, { name: 'sheet-test', rows: rows10 }]).change((cdata) => {
-          // console.log(cdata);
-          console.log('>>>', xs.getData());
-        });
-
-      xs.on('cell-selected', (cell, ri, ci) => {
-          console.log('cell:', cell, ', ri:', ri, ', ci:', ci);
-        }).on('cell-edited', (text, ri, ci) => {
-          console.log('text:', text, ', ri: ', ri, ', ci:', ci);
-        });
-
-      setTimeout(() => {
-        // xs.loadData([{ rows }]);
-        xs.cellText(14, 3, 'cell-text').reRender();
-        console.log('cell(8, 8):', xs.cell(8, 8));
-        console.log('cellStyle(8, 8):', xs.cellStyle(8, 8));
-      }, 5000);
+    const STORAGE_KEY = 'xspreadsheet_projects';
+    let currentProjectId = null, spreadsheetInstance = null;
+    const templates = {
+      basic: { name: 'Basic Template', data: { name: 'Sheet1', freeze: 'B3', styles: [{bgcolor:'#fff',align:'left',valign:'middle',textwrap:false,strike:false,underline:false,color:'#0a0a0a',font:{name:'Arial',size:10,bold:false,italic:false},format:'normal'}], merges: [], rows: {len:50,1:{cells:{0:{text:'Project Name'},1:{text:'Value'}}},2:{cells:{0:{text:'Item 1'},1:{text:100}}}, cols: {len:26,2:{width:150}} } },
+      budget: { name: 'Budget Tracker', data: { name: 'Budget', freeze: 'C3', styles: [{bgcolor:'#fff',align:'left',valign:'middle',textwrap:false,strike:false,underline:false,color:'#0a0a0a',font:{name:'Arial',size:10,bold:false,italic:false},format:'normal'}], merges: [], rows: {len:50,1:{cells:{0:{text:'Category'},1:{text:'Budget'},2:{text:'Actual'},3:{text:'Difference'}}},2:{cells:{0:{text:'Revenue'},1:{text:10000},2:{text:8500},3:{text:'-1500'}}}, cols: {len:26,2:{width:120},3:{width:120},4:{width:120}} } },
+      datalog: { name: 'Data Log', data: { name: 'Log', freeze: 'D3', styles: [{bgcolor:'#fff',align:'left',valign:'middle',textwrap:false,strike:false,underline:false,color:'#0a0a0a',font:{name:'Arial',size:10,bold:false,italic:false},format:'normal'}], merges: [], rows: {len:50,1:{cells:{0:{text:'Date'},1:{text:'Description'},2:{text:'Amount'},3:{text:'Status'}}},2:{cells:{0:{text:'2025-01-01'},1:{text:'Sale'},2:{text:500},3:{text:'Completed'}}}, cols: {len:26,2:{width:100},3:{width:100}} } },
+      inventory: { name: 'Inventory', data: { name: 'Items', freeze: 'D3', styles: [{bgcolor:'#fff',align:'left',valign:'middle',textwrap:false,strike:false,underline:false,color:'#0a0a0a',font:{name:'Arial',size:10,bold:false,italic:false},format:'normal'}], merges: [], rows: {len:50,1:{cells:{0:{text:'Item'},1:{text:'Quantity'},2:{text:'Unit Price'},3:{text:'Total'}}},2:{cells:{0:{text:'Widget A'},1:{text:100},2:{text:9.99},3:{text:999}}}, cols: {len:26,2:{width:100},3:{width:100}} } },
+      multisheet: { name: 'Multi-sheet', data: { name: 'Summary', freeze: 'C3', styles: [{bgcolor:'#fff',align:'left',valign:'middle',textwrap:false,strike:false,underline:false,color:'#0a0a0a',font:{name:'Arial',size:10,bold:false,italic:false},format:'normal'}], merges: [], rows: {len:50,1:{cells:{0:{text:'Metric'},1:{text:'Value'},2:{text:'Change'}}},2:{cells:{0:{text:'Total Sales'},1:{text:5000},2:{text:'+15%'}}},3:{cells:{0:{text:'Total Orders'},1:{text:250},2:{text:'+8%'}}}, cols: {len:26,2:{width:100}} } }
+    };
+    const templatesMultisheet = [{ name: 'Summary', rows: templates.multisheet.data.rows, cols: templates.multisheet.data.cols }, { name: 'Details', rows: {len:50,1:{cells:{0:{text:'Order ID'},1:{text:'Date'},2:{text:'Amount'},3:{text:'Status'}}},2:{cells:{0:{text:'ORD-001'},1:{text:'2025-01-01'},2:{text:100},3:{text:'Shipped'}}}, cols: {len:26,2:{width:100},3:{width:100}} }];
+    function getUrlParam(p) { return new URLSearchParams(location.search).get(p); }
+    function getProjects() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    function saveProjects(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+    function generateId() { return 'proj_' + Date.now() + '_' + Math.random().toString(36).substr(2,9); }
+    function now() { return new Date().toISOString(); }
+    function formatDate(iso) {
+      const d = new Date(iso), n = new Date(), diff = n - d, days = Math.floor(diff / 864e5);
+      if (days === 0) return 'Today'; if (days === 1) return 'Yesterday';
+      if (days < 7) return days + ' days ago'; if (days < 30) return Math.floor(days/7) + ' weeks ago';
+      return d.toLocaleDateString();
     }
+    function toggleTemplates() { document.getElementById('templateDropdown').classList.toggle('show'); }
+    function renderProjects() {
+      const p = getProjects(), g = document.getElementById('projectsGrid');
+      if (!p.length) { g.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="#9CA3AF"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg></div><h3>No projects yet</h3><p>Create your first project to get started</p></div>'; return; }
+      p.sort((a,b) => new Date(b.modifiedAt) - new Date(a.modifiedAt));
+      g.innerHTML = p.map((proj) => `<div class="project-card" onclick="openProject('${proj.id}')"><button class="project-delete" onclick="event.stopPropagation();deleteProject('${proj.id}')">×</button><div class="project-name">${proj.name}</div><div class="project-meta"><span>Modified ${formatDate(proj.modifiedAt)}</span><span>${(proj.data?.rows?.len||0)} rows × ${(proj.data?.cols?.len||0)} cols</span></div></div>`).join('');
+    }
+    function createProject(type) {
+      const projects = getProjects(), t = templates[type];
+      let sheetData = t.data;
+      if (type === 'multisheet') sheetData = { name: templatesMultisheet[0].name, freeze: 'C3', styles: t.data.styles, merges: [], rows: templatesMultisheet[0].rows, cols: templatesMultisheet[0].cols };
+      const newProj = { id: generateId(), name: t.name + ' ' + (projects.length+1), createdAt: now(), modifiedAt: now(), data: sheetData };
+      projects.push(newProj);
+      saveProjects(projects);
+      document.getElementById('templateDropdown').classList.remove('show');
+      location.href = '?project=' + newProj.id;
+    }
+    function deleteProject(id) { if (!confirm('Delete this project?')) return; const projects = getProjects().filter(p => p.id !== id); saveProjects(projects); renderProjects(); }
+    function openProject(id) { location.href = '?project=' + id; }
+    function goToDashboard() { location.href = '?'; }
+    function saveCurrentProject() {
+      if (!currentProjectId || !spreadsheetInstance) return;
+      const projects = getProjects(), i = projects.findIndex(p => p.id === currentProjectId);
+      if (i > -1) { projects[i].data = spreadsheetInstance.getData()[0]; projects[i].modifiedAt = now(); saveProjects(projects); const btn = document.querySelector('.spreadsheet-page .btn-new'); btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>Saved!'; setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>Save',1500); }
+    }
+    function loadSpreadsheet(id) {
+      const p = getProjects().find(x => x.id === id);
+      if (!p) { goToDashboard(); return; }
+      currentProjectId = id; document.getElementById('currentProjectName').textContent = p.name;
+      const loadData = [p.data];
+      spreadsheetInstance = x_spreadsheet('#x-spreadsheet-demo',{showToolbar:true,showGrid:true,showBottomBar:true}).loadData(loadData).change(() => { if (currentProjectId) { const ps = getProjects(), i = ps.findIndex(x => x.id === currentProjectId); if (i > -1) ps[i].modifiedAt = now(); } });
+    }
+    function init() {
+      const id = getUrlParam('project');
+      if (id) { document.getElementById('landing').classList.remove('active'); document.getElementById('spreadsheetPage').classList.add('active'); loadSpreadsheet(id); }
+      else { document.getElementById('landing').classList.add('active'); document.getElementById('spreadsheetPage').classList.remove('active'); renderProjects(); }
+    }
+    document.addEventListener('click', e => { if (!e.target.closest('#templateDropdown') && !e.target.closest('#newBtn')) document.getElementById('templateDropdown').classList.remove('show'); });
   </script>
-  <!--script type="text/javascript" src="https://unpkg.com/x-data-spreadsheet@1.0.20/dist/locale/zh-cn.js"></script-->
-<script type="text/javascript" src="xspreadsheet.js"></script></body>
+</body>
 </html>
