@@ -139,7 +139,10 @@ class App {
       h('div', 'back-btn').html('← Back').on('click', () => {
         window.location.hash = '#dashboard';
       }),
-      h('div', 'project-title').html(project.name),
+      h('input', 'project-title-input').val(project.name).on('input', (e) => {
+        project.name = e.target.value;
+        this.saveProjects();
+      }),
       h('div', 'save-status').html('All changes saved')
     );
 
@@ -153,6 +156,10 @@ class App {
       showToolbar: true,
       showGrid: true,
       showBottomBar: true,
+      view: {
+        height: () => document.documentElement.clientHeight - 50,
+        width: () => document.documentElement.clientWidth,
+      }
     });
 
     this.spreadsheet.loadData(project.data);
