@@ -1,0 +1,180 @@
+@import './index.less';
+
+.x-spreadsheet-landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #2185D0 0%, #6435C9 100%);
+  color: white;
+  font-family: 'Lato', sans-serif;
+  text-align: center;
+
+  h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+
+  .get-started-btn {
+    padding: 1rem 3rem;
+    font-size: 1.25rem;
+    background: white;
+    color: #2185D0;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+  }
+}
+
+.x-spreadsheet-dashboard {
+  padding: 2rem;
+  font-family: 'Lato', sans-serif;
+  background: #f8f9fa;
+  min-height: 100vh;
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+
+    h2 {
+      margin: 0;
+      color: #333;
+    }
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    position: relative;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      
+      .delete-btn {
+        display: block;
+      }
+    }
+
+    .project-icon {
+      font-size: 3rem;
+      color: #2185D0;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .project-name {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-date {
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .delete-btn {
+      display: none;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 0.7rem;
+
+      &:hover {
+        background: #ff7875;
+      }
+    }
+
+    &.new-project {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #ccc;
+      background: transparent;
+
+      &:hover {
+        border-color: #2185D0;
+        color: #2185D0;
+      }
+
+      .project-icon {
+        color: #ccc;
+      }
+    }
+  }
+}
+
+.spreadsheet-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .spreadsheet-header {
+    height: 50px;
+    background: white;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    border-bottom: 1px solid #ddd;
+
+    .back-btn {
+      margin-right: 1rem;
+      cursor: pointer;
+      color: #2185D0;
+      font-weight: bold;
+    }
+
+    .project-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    
+    .save-status {
+      margin-left: auto;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  }
+  
+  #x-spreadsheet-editor {
+    flex: 1;
+  }
+}
