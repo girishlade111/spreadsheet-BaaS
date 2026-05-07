@@ -274,7 +274,7 @@ body {
   z-index: 11;
 
   .@{css-prefix}-resizer-hover {
-    background-color: rgba(75, 137, 255, .25);
+    background-color: rgba(59, 130, 246, 0.2);
   }
   .@{css-prefix}-resizer-line {
     position: absolute;
@@ -283,7 +283,7 @@ body {
   &.horizontal {
     cursor: row-resize;
     .@{css-prefix}-resizer-line {
-      border-bottom: 2px dashed rgb(75, 137, 255);
+      border-bottom: 2px dashed @selection-color;
       left: 0;
       bottom: 0;
     }
@@ -291,7 +291,7 @@ body {
   &.vertical {
     cursor: col-resize;
     .@{css-prefix}-resizer-line {
-      border-right: 2px dashed rgb(75, 137, 255);
+      border-right: 2px dashed @selection-color;
       top: 0;
       right: 0;
     }
@@ -547,12 +547,14 @@ body {
 .@{css-prefix}-contextmenu,
 .@{css-prefix}-sort-filter {
   position: absolute;
-  box-shadow: 1px 2px 5px 2px rgba(51, 51, 51, 0.15);
-  background: #fff;
+  box-shadow: @shadow-dropdown;
+  background: #FFFFFF;
   z-index: 100;
   width: 260px;
   pointer-events: auto;
   overflow: auto;
+  border-radius: @border-radius-lg;
+  border: 1px solid #E5E7EB;
 }
 
 .@{css-prefix}-suggest {
